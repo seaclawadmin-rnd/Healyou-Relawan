@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Relawan - Muslimah Healing Day by Heal You</title>
+    <title>Muslimah Healing Day - Relawan</title>
+    <meta name="description" content="Sistem Pendaftaran, Pemetaan Peran & Seleksi Otomatis Relawan Muslimah Healing Day by Heal You">
+    <meta property="og:title" content="Muslimah Healing Day - Relawan">
+    <meta property="og:description" content="Sistem Pendaftaran, Pemetaan Peran & Seleksi Otomatis Relawan Muslimah Healing Day by Heal You">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -659,10 +662,6 @@
                 showNotification("Tuliskan minimal satu kalimat komitmen sebelum mengirim.");
                 return;
             }
-            if (!db) {
-                showNotification("Konfigurasi Firebase belum dipasang di firebase-config.js.");
-                return;
-            }
 
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
@@ -693,12 +692,49 @@
                     hasil: document.getElementById('star-r').value.trim()
                 },
                 keahlian_khusus: document.getElementById('skill-input').value.trim(),
-                komitmen_cepat: commitment,
-                created_at: serverTimestamp()
+                komitmen_cepat: commitment
             };
 
+            // If Firebase Firestore is active, save to Firestore
+            if (db) {
+                try {
+                    await addDoc(collection(db, "pendaftar_relawan"), {
+                        ...payload,
+                        created_at: serverTimestamp()
+                    });
+                    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+
+                    document.getElementById('live-result-code').textContent = kodeHasil;
+                    document.getElementById('final-code-display').textContent = kodeHasil;
+                    document.getElementById('goto-hasil-link').href = `hasil.html?kode=${encodeURIComponent(kodeHasil)}`;
+                    nextStep(7);
+
+                    const unsub = onSnapshot(doc(db, "hasil_seleksi", kodeHasil), (snap) => {
+                        if (snap.exists()) {
+                            const d = snap.data();
+                            unsub();
+                            renderFinalResult(d);
+                        }
+                    });
+                    return;
+                } catch (err) {
+                    console.warn("Firestore save failed, falling back to server API", err);
+                }
+            }
+
+            // Fallback to local server API evaluation
             try {
-                await addDoc(collection(db, "pendaftar_relawan"), payload);
+                const resp = await fetch('/api/pendaftar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) {
+                    throw new Error("Server error " + resp.status);
+                }
+
+                const resData = await resp.json();
                 try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
 
                 document.getElementById('live-result-code').textContent = kodeHasil;
@@ -706,13 +742,10 @@
                 document.getElementById('goto-hasil-link').href = `hasil.html?kode=${encodeURIComponent(kodeHasil)}`;
                 nextStep(7);
 
-                const unsub = onSnapshot(doc(db, "hasil_seleksi", kodeHasil), (snap) => {
-                    if (snap.exists()) {
-                        const d = snap.data();
-                        unsub();
-                        renderFinalResult(d);
-                    }
-                });
+                // Simulate brief server evaluation transition for realism
+                setTimeout(() => {
+                    renderFinalResult(resData.evaluasi);
+                }, 1200);
             } catch (err) {
                 console.error(err);
                 showNotification("Gagal mengirim pendaftaran. Periksa koneksi internet Anda.");

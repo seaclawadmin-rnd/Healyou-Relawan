@@ -1,0 +1,18 @@
+{
+  "name": "muslimah-healing-day-relawan",
+  "version": "1.0.0",
+  "description": "Sistem Pendaftaran & Pemetaan Peran Relawan Muslimah Healing Day by Heal You",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'Build complete'",
+    "lint": "node --check server.js"
+  },
+  "dependencies": {
+    "@google/genai": "*",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

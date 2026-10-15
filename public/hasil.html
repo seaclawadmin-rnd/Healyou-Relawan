@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Hasil Seleksi Relawan - Muslimah Healing Day by Heal You</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        healyou: {
+                            50: '#faf7ff', 100: '#f3ebff', 200: '#e5d4ff',
+                            pink: '#e5b2f7', blue: '#84b6ff',
+                            500: '#9b87f5', 600: '#7c6ee6', 700: '#6556cc',
+                            800: '#4a3e99', 900: '#2e2559',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: linear-gradient(135deg, #fdfaff 0%, #f3f7ff 100%); color: #2e2559; }
+        .healyou-gradient { background: linear-gradient(90deg, #e5b2f7 0%, #84b6ff 100%); }
+        .healyou-btn-gradient { background: linear-gradient(90deg, #9b87f5 0%, #6d9eeb 100%); }
+        .healyou-btn-gradient:hover { background: linear-gradient(90deg, #836ce8 0%, #5689db 100%); }
+        .fade-in { animation: fadeIn 0.35s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen font-sans flex flex-col justify-between items-center p-4 selection:bg-healyou-500 selection:text-white">
+
+    <div class="w-full max-w-xl mx-auto my-auto">
+        <main class="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden ring-1 ring-healyou-200">
+            <header class="healyou-gradient p-6 text-center text-white relative">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center font-serif font-bold text-xl mb-2 border border-white/40 shadow-sm">
+                    HY
+                </div>
+                <h1 class="font-serif text-2xl font-bold">Cek Hasil Seleksi Relawan</h1>
+                <p class="text-xs text-white/90 mt-1">Muslimah Healing Day — by Heal You</p>
+            </header>
+
+            <div class="p-6 md:p-8 space-y-6">
+                <div>
+                    <label for="code-input" class="block text-xs font-semibold text-healyou-900 mb-2 uppercase tracking-wider">
+                        Masukkan 12 Karakter Kode Hasil Anda
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="code-input" maxlength="12" placeholder="Contoh: HY98KLP2MQ7X"
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-xl font-mono text-base uppercase font-bold tracking-wider outline-none focus:ring-2 focus:ring-healyou-500"
+                               onkeydown="if(event.key==='Enter') searchResult()">
+                        <button type="button" onclick="searchResult()" id="btn-search"
+                                class="healyou-btn-gradient text-white font-semibold px-6 py-3 rounded-xl shadow text-sm">
+                            Cari
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1.5">Kode unik 12 karakter didapatkan setelah Anda menyelesaikan formulir pendaftaran.</p>
+                </div>
+
+                <div id="loading-box" class="hidden text-center py-8">
+                    <div class="w-10 h-10 border-4 border-healyou-200 border-t-healyou-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p class="text-xs text-gray-500">Mencari data evaluasi relawan...</p>
+                </div>
+
+                <div id="error-box" class="hidden bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs leading-relaxed"></div>
+
+                <div id="result-box" class="hidden space-y-4 fade-in">
+                    <div class="text-center pb-2 border-b">
+                        <span id="res-badge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2"></span>
+                        <h2 class="font-serif text-xl font-bold text-healyou-900" id="res-title">Status Seleksi Relawan</h2>
+                        <p class="text-xs text-gray-500 mt-1">Kode Verifikasi: <strong id="res-code" class="font-mono text-healyou-700"></strong></p>
+                    </div>
+
+                    <div class="bg-healyou-50 p-4 rounded-2xl border border-healyou-100 flex justify-between items-center">
+                        <div>
+                            <span class="text-xs text-gray-500 block">Total Skor Akhir</span>
+                            <span id="res-total" class="text-3xl font-extrabold text-healyou-800"></span>
+                            <span class="text-xs text-gray-400"> / 100</span>
+                        </div>
+                        <div class="text-right text-xs text-gray-600 space-y-1">
+                            <div>Studi Kasus (SJT): <strong id="res-sjt"></strong>/40</div>
+                            <div>Esai Pengalaman (STAR): <strong id="res-star"></strong>/60</div>
+                            <div class="text-[11px] text-healyou-600">Standar BARS: <strong id="res-bars"></strong>/5</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border text-xs space-y-2">
+                        <div class="flex justify-between text-gray-700">
+                            <span>Divisi Pilihan:</span>
+                            <strong id="res-role" class="text-healyou-900"></strong>
+                        </div>
+                        <div class="flex justify-between text-gray-700">
+                            <span>Divisi Cadangan:</span>
+                            <span id="res-subrole" class="text-gray-600"></span>
+                        </div>
+                        <div class="pt-2 border-t mt-2">
+                            <span class="font-semibold block text-healyou-900 mb-1">Catatan Evaluasi Panitia HR:</span>
+                            <p id="res-reason" class="text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl"></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-xs leading-relaxed" id="next-step-box">
+                        <strong class="block mb-1">Langkah Selanjutnya:</strong>
+                        <span id="next-step-desc">Pengumuman resmi pembagian jadwal Technical Meeting akan dihubungi oleh Tim HR via WhatsApp panitia. Pastikan nomor Anda selalu aktif.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center py-4 text-xs text-gray-400 flex justify-between items-center px-3">
+            <a href="index.html" class="text-healyou-600 hover:underline">← Formulir Pendaftaran</a>
+            <a href="admin.html" class="text-healyou-600 hover:underline">🔒 Dasbor Panitia</a>
+        </footer>
+    </div>
+
+    <script type="module">
+        const ROLE_NAMES = {
+            pfa: "Pendamping Psikologis (PFA)",
+            floordirector: "Floor Director & Timekeeper",
+            mc: "MC (Master of Ceremony)",
+            registrasi: "Tim Registrasi & Data",
+            usher: "Usher & Hospitality",
+            perlengkapan: "Perlengkapan & Logistik",
+            dokumentasi: "Dokumentasi & Visual",
+            sponsor: "Kemitraan & Sponsorship"
+        };
+
+        window.searchResult = async function() {
+            const input = document.getElementById('code-input');
+            const code = input.value.trim().toUpperCase();
+            const errBox = document.getElementById('error-box');
+            const resBox = document.getElementById('result-box');
+            const loadBox = document.getElementById('loading-box');
+
+            errBox.classList.add('hidden');
+            resBox.classList.add('hidden');
+
+            if (!code || code.length < 6) {
+                errBox.textContent = "Masukkan 12 karakter kode pendaftaran yang valid.";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            loadBox.classList.remove('hidden');
+
+            try {
+                const resp = await fetch(`/api/hasil/${encodeURIComponent(code)}`);
+                loadBox.classList.add('hidden');
+
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => ({}));
+                    errBox.textContent = errData.error || "Data pendaftar dengan kode tersebut tidak ditemukan.";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                const d = await resp.json();
+                document.getElementById('res-code').textContent = d.kode_hasil || code;
+                document.getElementById('res-total').textContent = d.total_skor;
+                document.getElementById('res-sjt').textContent = d.skor_sjt;
+                document.getElementById('res-star').textContent = d.skor_esai;
+                document.getElementById('res-bars').textContent = d.bars_esai;
+                document.getElementById('res-role').textContent = ROLE_NAMES[d.peran_pilihan] || d.peran_pilihan;
+                document.getElementById('res-subrole').textContent = ROLE_NAMES[d.peran_cadangan] || d.peran_cadangan || '-';
+                document.getElementById('res-reason').textContent = d.alasan_singkat || 'Evaluasi telah selesai dilakukan secara objektif oleh sistem seleksi Heal You.';
+
+                const badge = document.getElementById('res-badge');
+                badge.textContent = d.status_label || d.status_kode;
+                if (d.status_kode === 'LOLOS_PRIORITAS') {
+                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-emerald-100 text-emerald-800';
+                    document.getElementById('next-step-desc').textContent = 'Selamat! Anda masuk dalam daftar Prioritas Utama. Tim HR akan menghubungi nomor WhatsApp Anda untuk konfirmasi kehadiran Technical Meeting.';
+                } else if (d.status_kode === 'CADANGAN') {
+                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-amber-100 text-amber-800';
+                    document.getElementById('next-step-desc').textContent = 'Anda tercatat dalam Daftar Cadangan Potensial. Panitia akan menghubungi Anda apabila terdapat kuota tambahan pada divisi utama atau cadangan.';
+                } else {
+                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-rose-100 text-rose-800';
+                    document.getElementById('next-step-desc').textContent = 'Terima kasih atas antusiasme dan waktu Anda. Saat ini kuota belum mencukupi untuk prioritas acara kali ini. Doa dan dukungan Anda sangat berarti bagi kami.';
+                }
+
+                resBox.classList.remove('hidden');
+            } catch (err) {
+                loadBox.classList.add('hidden');
+                errBox.textContent = "Gagal menghubungi server. Periksa koneksi internet Anda.";
+                errBox.classList.remove('hidden');
+            }
+        };
+
+        // Auto search if ?kode= query param exists
+        const urlParams = new URLSearchParams(window.location.search);
+        const qCode = urlParams.get('kode');
+        if (qCode) {
+            document.getElementById('code-input').value = qCode;
+            window.searchResult();
+        }
+    </script>
+</body>
+</html>

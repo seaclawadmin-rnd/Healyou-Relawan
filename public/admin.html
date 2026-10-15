@@ -33,10 +33,13 @@
         <p class="text-xs text-gray-500 text-center mb-5">Masuk dengan akun admin resmi yang terdaftar di Firebase Authentication.</p>
         <div id="login-err" class="hidden bg-rose-50 text-rose-700 p-3 rounded-xl text-xs mb-3"></div>
         <div class="space-y-3 mb-4">
-            <input type="email" id="email" placeholder="Email Admin" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none">
-            <input type="password" id="password" placeholder="Kata Sandi" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none" onkeydown="if(event.key==='Enter') doLogin()">
+            <input type="email" id="email" placeholder="Email Admin" value="admin@healyou.id" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none">
+            <input type="password" id="password" placeholder="Kata Sandi" value="healyou2026" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none" onkeydown="if(event.key==='Enter') doLogin()">
         </div>
-        <button type="button" onclick="doLogin()" class="w-full py-2.5 text-sm font-semibold text-white healyou-btn-gradient rounded-xl shadow">Masuk Dasbor</button>
+        <div class="space-y-2">
+            <button type="button" onclick="doLogin()" class="w-full py-2.5 text-sm font-semibold text-white healyou-btn-gradient rounded-xl shadow">Masuk Dasbor</button>
+            <p class="text-[11px] text-gray-500 text-center">💡 Akun Bawaan: <code class="bg-gray-100 px-1 py-0.5 rounded text-healyou-800">admin@healyou.id</code> / <code class="bg-gray-100 px-1 py-0.5 rounded text-healyou-800">healyou2026</code></p>
+        </div>
     </div>
 
     <main id="dashboard-card" class="max-w-6xl mx-auto bg-white shadow-xl rounded-3xl overflow-hidden ring-1 ring-healyou-200 hidden">
@@ -120,9 +123,19 @@
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("API_KEY_ANDA");
+        let app = null;
+        let db = null;
+        let auth = null;
+        if (isConfigured) {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            } catch (e) {
+                console.warn("Firebase init failed:", e);
+            }
+        }
         let allData = [];
 
         const ROLE_NAMES = {
@@ -144,33 +157,101 @@
             return /^[=+\-@\t\r]/.test(str) ? "'" + str : str;
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-card').classList.add('hidden');
-                document.getElementById('dashboard-card').classList.remove('hidden');
-                document.getElementById('admin-email-label').textContent = `Login sebagai: ${user.email}`;
-                window.loadCandidates();
-            } else {
-                document.getElementById('dashboard-card').classList.add('hidden');
-                document.getElementById('login-card').classList.remove('hidden');
-            }
-        });
+        function showDashboard(email) {
+            document.getElementById('login-card').classList.add('hidden');
+            document.getElementById('dashboard-card').classList.remove('hidden');
+            document.getElementById('admin-email-label').textContent = `Login sebagai: ${email || 'admin@healyou.id'}`;
+            window.loadCandidates();
+        }
+
+        function showLogin() {
+            document.getElementById('dashboard-card').classList.add('hidden');
+            document.getElementById('login-card').classList.remove('hidden');
+        }
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    showDashboard(user.email);
+                } else if (!localStorage.getItem('healyou_admin_session')) {
+                    showLogin();
+                }
+            });
+        }
+
+        // Check local session
+        const storedAdmin = localStorage.getItem('healyou_admin_session');
+        if (storedAdmin) {
+            showDashboard(storedAdmin);
+        }
 
         window.doLogin = async function() {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
             const errEl = document.getElementById('login-err');
             errEl.classList.add('hidden');
-            try { await signInWithEmailAndPassword(auth, email, pass); }
-            catch (e) { errEl.textContent = "Email atau kata sandi tidak valid."; errEl.classList.remove('hidden'); }
+
+            if (auth) {
+                try {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    return;
+                } catch (e) {
+                    console.log("Firebase auth failed, checking server API...");
+                }
+            }
+
+            try {
+                const resp = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pass })
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    localStorage.setItem('healyou_admin_session', data.email || email);
+                    showDashboard(data.email || email);
+                } else {
+                    errEl.textContent = "Email atau kata sandi tidak valid.";
+                    errEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                errEl.textContent = "Gagal menghubungi server panitia.";
+                errEl.classList.remove('hidden');
+            }
         };
 
-        window.doLogout = () => signOut(auth);
+        window.doLogout = async function() {
+            localStorage.removeItem('healyou_admin_session');
+            if (auth) {
+                try { await signOut(auth); } catch (e) {}
+            }
+            showLogin();
+        };
 
         window.loadCandidates = async function() {
-            const snap = await getDocs(collection(db, "pendaftar_relawan"));
             allData = [];
-            snap.forEach(d => allData.push({ id: d.id, ...d.data() }));
+            if (db) {
+                try {
+                    const snap = await getDocs(collection(db, "pendaftar_relawan"));
+                    snap.forEach(d => allData.push({ id: d.id, ...d.data() }));
+                    if (allData.length > 0) {
+                        window.renderTable();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("Firestore fetch error, fallback to server API", e);
+                }
+            }
+
+            try {
+                const res = await fetch('/api/admin/pendaftar');
+                if (res.ok) {
+                    allData = await res.json();
+                }
+            } catch (e) {
+                console.error("Failed to load candidates:", e);
+            }
             window.renderTable();
         };
 

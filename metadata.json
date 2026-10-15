@@ -1,0 +1,7 @@
+{
+  "name": "Muslimah Healing Day - Relawan",
+  "description": "Sistem Pendaftaran, Pemetaan Peran & Seleksi Otomatis Relawan Muslimah Healing Day by Heal You",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
