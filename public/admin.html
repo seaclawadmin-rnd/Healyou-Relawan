@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Admin HR - Muslimah Healing Day by Heal You</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        healyou: { 50: '#faf7ff', 100: '#f3ebff', 200: '#e5d4ff', 500: '#9b87f5', 600: '#7c6ee6', 800: '#4a3e99', 900: '#2e2559' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: linear-gradient(135deg, #fdfaff 0%, #f3f7ff 100%); color: #2e2559; }
+        .healyou-gradient { background: linear-gradient(90deg, #e5b2f7 0%, #84b6ff 100%); }
+        .healyou-btn-gradient { background: linear-gradient(90deg, #9b87f5 0%, #6d9eeb 100%); }
+    </style>
+</head>
+<body class="min-h-screen font-sans p-4 md:p-6">
+
+    <div id="login-card" class="max-w-sm mx-auto my-20 bg-white p-6 rounded-3xl shadow-xl border border-healyou-200">
+        <div class="w-12 h-12 rounded-2xl healyou-gradient mx-auto flex items-center justify-center text-white font-serif font-bold text-lg mb-3">HY</div>
+        <h1 class="font-serif text-xl font-bold text-center text-healyou-900 mb-1">Login Panitia HR — Heal You</h1>
+        <p class="text-xs text-gray-500 text-center mb-5">Masuk dengan akun admin resmi yang terdaftar di Firebase Authentication.</p>
+        <div id="login-err" class="hidden bg-rose-50 text-rose-700 p-3 rounded-xl text-xs mb-3"></div>
+        <div class="space-y-3 mb-4">
+            <input type="email" id="email" placeholder="Email Admin" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none">
+            <input type="password" id="password" placeholder="Kata Sandi" class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none" onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button type="button" onclick="doLogin()" class="w-full py-2.5 text-sm font-semibold text-white healyou-btn-gradient rounded-xl shadow">Masuk Dasbor</button>
+    </div>
+
+    <main id="dashboard-card" class="max-w-6xl mx-auto bg-white shadow-xl rounded-3xl overflow-hidden ring-1 ring-healyou-200 hidden">
+        <header class="healyou-gradient px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-4 text-white">
+            <div>
+                <h1 class="font-serif text-2xl font-bold">Dasbor Seleksi Relawan — Muslimah Healing Day</h1>
+                <p id="admin-email-label" class="text-xs opacity-90">Peringkat Otomatis Server (SJT 40 + Esai 60)</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="exportFile('xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow">Unduh Excel (.xlsx)</button>
+                <button type="button" onclick="exportFile('csv')" class="bg-white/20 hover:bg-white/30 text-white border border-white/40 text-xs font-semibold px-4 py-2.5 rounded-xl">Unduh CSV</button>
+                <button type="button" onclick="doLogout()" class="bg-white text-healyou-900 text-xs font-semibold px-4 py-2.5 rounded-xl">Keluar</button>
+            </div>
+        </header>
+
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-healyou-50 p-4 rounded-2xl border border-healyou-100"><span class="text-xs text-gray-500 block">Total Pendaftar</span><span id="st-total" class="text-2xl font-bold text-healyou-900">0</span></div>
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100"><span class="text-xs text-emerald-700 block">Prioritas Utama (≥75)</span><span id="st-lolos" class="text-2xl font-bold text-emerald-700">0</span></div>
+                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100"><span class="text-xs text-amber-700 block">Cadangan (60–74)</span><span id="st-cadangan" class="text-2xl font-bold text-amber-700">0</span></div>
+                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100"><span class="text-xs text-rose-700 block">Belum Sesuai (<60)</span><span id="st-belum" class="text-2xl font-bold text-rose-700">0</span></div>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-4 bg-gray-50 p-3.5 rounded-2xl">
+                <div class="flex flex-wrap gap-2.5">
+                    <select id="f-role" onchange="renderTable()" class="px-3 py-2 border rounded-xl text-xs bg-white">
+                        <option value="ALL">Semua Peran (8 Divisi)</option>
+                        <option value="pfa">Pendamping Psikologis (PFA)</option>
+                        <option value="floordirector">Floor Director & Timekeeper</option>
+                        <option value="mc">MC (Master of Ceremony)</option>
+                        <option value="registrasi">Tim Registrasi & Data</option>
+                        <option value="usher">Usher & Hospitality</option>
+                        <option value="perlengkapan">Perlengkapan & Logistik</option>
+                        <option value="dokumentasi">Dokumentasi & Visual</option>
+                        <option value="sponsor">Kemitraan & Sponsorship</option>
+                    </select>
+                    <select id="f-status" onchange="renderTable()" class="px-3 py-2 border rounded-xl text-xs bg-white">
+                        <option value="ALL">Semua Status</option>
+                        <option value="LOLOS_PRIORITAS">Prioritas Utama (≥75)</option>
+                        <option value="CADANGAN">Cadangan (60–74)</option>
+                        <option value="BELUM_SESUAI">Belum Sesuai</option>
+                    </select>
+                    <input type="text" id="f-search" oninput="renderTable()" placeholder="Cari nama / WA / kode..." class="px-3 py-2 border rounded-xl text-xs bg-white">
+                </div>
+                <button type="button" onclick="loadCandidates()" class="text-xs font-semibold text-healyou-700 hover:underline">↻ Muat Ulang Data</button>
+            </div>
+
+            <div class="overflow-x-auto border border-gray-200 rounded-2xl">
+                <table class="w-full text-left border-collapse text-xs md:text-sm">
+                    <thead>
+                        <tr class="bg-healyou-50 text-healyou-900 text-xs uppercase border-b border-healyou-200">
+                            <th class="py-3.5 px-4 text-center">Rank</th>
+                            <th class="py-3.5 px-4">Nama & WhatsApp</th>
+                            <th class="py-3.5 px-4">Divisi Utama & Cadangan</th>
+                            <th class="py-3.5 px-4 text-center">Skor Akhir</th>
+                            <th class="py-3.5 px-4">Rincian (SJT 40 / Esai 60)</th>
+                            <th class="py-3.5 px-4">Status & Alasan Skor</th>
+                            <th class="py-3.5 px-4 text-center">Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detail Esai -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
+            <div class="flex justify-between items-start border-b pb-3">
+                <div><h3 id="m-name" class="font-serif text-xl font-bold text-healyou-900"></h3><p id="m-meta" class="text-xs text-gray-500"></p></div>
+                <button type="button" onclick="document.getElementById('detail-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-700">✕</button>
+            </div>
+            <div id="m-content" class="space-y-3 text-xs md:text-sm text-gray-700"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { firebaseConfig } from "./firebase-config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let allData = [];
+
+        const ROLE_NAMES = {
+            pfa: "Pendamping Psikologis (PFA)",
+            floordirector: "Floor Director & Timekeeper",
+            mc: "MC (Master of Ceremony)",
+            registrasi: "Tim Registrasi & Data",
+            usher: "Usher & Hospitality",
+            perlengkapan: "Perlengkapan & Logistik",
+            dokumentasi: "Dokumentasi & Visual",
+            sponsor: "Kemitraan & Sponsorship"
+        };
+
+        function esc(s) {
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function sanitizeCell(val) {
+            const str = String(val ?? '');
+            return /^[=+\-@\t\r]/.test(str) ? "'" + str : str;
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-card').classList.add('hidden');
+                document.getElementById('dashboard-card').classList.remove('hidden');
+                document.getElementById('admin-email-label').textContent = `Login sebagai: ${user.email}`;
+                window.loadCandidates();
+            } else {
+                document.getElementById('dashboard-card').classList.add('hidden');
+                document.getElementById('login-card').classList.remove('hidden');
+            }
+        });
+
+        window.doLogin = async function() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const errEl = document.getElementById('login-err');
+            errEl.classList.add('hidden');
+            try { await signInWithEmailAndPassword(auth, email, pass); }
+            catch (e) { errEl.textContent = "Email atau kata sandi tidak valid."; errEl.classList.remove('hidden'); }
+        };
+
+        window.doLogout = () => signOut(auth);
+
+        window.loadCandidates = async function() {
+            const snap = await getDocs(collection(db, "pendaftar_relawan"));
+            allData = [];
+            snap.forEach(d => allData.push({ id: d.id, ...d.data() }));
+            window.renderTable();
+        };
+
+        function getFilteredSorted() {
+            const roleF = document.getElementById('f-role').value;
+            const statF = document.getElementById('f-status').value;
+            const q = document.getElementById('f-search').value.toLowerCase().trim();
+
+            const sorted = [...allData].sort((a, b) => (b.evaluasi?.total_skor || 0) - (a.evaluasi?.total_skor || 0));
+            return sorted.filter(c => {
+                const ev = c.evaluasi || {};
+                const matchR = roleF === 'ALL' || c.peran_pilihan === roleF;
+                const matchS = statF === 'ALL' || ev.status_kode === statF;
+                const matchQ = !q || String(c.nama || '').toLowerCase().includes(q) || String(c.whatsapp || '').includes(q) || String(c.kode_hasil || '').toLowerCase().includes(q);
+                return matchR && matchS && matchQ;
+            });
+        }
+
+        window.renderTable = function() {
+            document.getElementById('st-total').textContent = allData.length;
+            document.getElementById('st-lolos').textContent = allData.filter(x => x.evaluasi?.status_kode === 'LOLOS_PRIORITAS').length;
+            document.getElementById('st-cadangan').textContent = allData.filter(x => x.evaluasi?.status_kode === 'CADANGAN').length;
+            document.getElementById('st-belum').textContent = allData.filter(x => x.evaluasi?.status_kode === 'BELUM_SESUAI').length;
+
+            const list = getFilteredSorted();
+            const tbody = document.getElementById('tbody');
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400">Belum ada data pendaftar.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((c, idx) => {
+                const ev = c.evaluasi || {};
+                const badge = ev.status_kode === 'LOLOS_PRIORITAS' ? 'bg-emerald-100 text-emerald-800' : (ev.status_kode === 'CADANGAN' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800');
+                const waClean = String(c.whatsapp || '').replace(/[^0-9]/g, '');
+
+                return `
+                    <tr class="hover:bg-healyou-50/50">
+                        <td class="py-3.5 px-4 font-bold text-center text-healyou-800">#${idx + 1}</td>
+                        <td class="py-3.5 px-4"><div class="font-semibold text-gray-900">${esc(c.nama)}</div><a href="https://wa.me/${waClean}" target="_blank" class="text-xs text-emerald-600 hover:underline">Chat WA (+${esc(waClean)})</a><div class="text-[11px] font-mono text-gray-400">Kode: ${esc(c.kode_hasil)}</div></td>
+                        <td class="py-3.5 px-4"><div class="font-medium text-healyou-900">${esc(ROLE_NAMES[c.peran_pilihan] || c.peran_pilihan)}</div><div class="text-[11px] text-gray-400">Cadangan: ${esc(ROLE_NAMES[c.peran_cadangan] || c.peran_cadangan || '-')}</div></td>
+                        <td class="py-3.5 px-4 text-center font-bold text-base text-healyou-800">${ev.total_skor ?? 'Menunggu'}</td>
+                        <td class="py-3.5 px-4 text-xs text-gray-600"><div>SJT: <strong>${ev.skor_sjt ?? '-'}/40</strong></div><div>Esai: <strong>${ev.skor_esai ?? '-'}/60</strong> (BARS ${ev.bars_esai ?? '-'}/5)</div></td>
+                        <td class="py-3.5 px-4"><span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge}">${esc(ev.status_label || 'Menunggu Server')}</span><div class="text-[11px] text-gray-500 mt-1 line-clamp-2">${esc(ev.alasan_singkat || '')}</div></td>
+                        <td class="py-3.5 px-4 text-center"><button type="button" data-id="${esc(c.id)}" class="detail-btn bg-healyou-100 hover:bg-healyou-200 text-healyou-800 font-semibold px-3 py-1.5 rounded-lg text-xs">Baca Esai</button></td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        document.getElementById('tbody').addEventListener('click', (e) => {
+            const btn = e.target.closest('.detail-btn');
+            if (!btn) return;
+            const c = allData.find(x => x.id === btn.getAttribute('data-id'));
+            if (!c) return;
+            const ev = c.evaluasi || {};
+            const st = c.star || {};
+            document.getElementById('m-name').textContent = `${c.nama} (${c.kode_hasil})`;
+            document.getElementById('m-meta').textContent = `Divisi: ${ROLE_NAMES[c.peran_pilihan] || c.peran_pilihan} • Total Skor: ${ev.total_skor ?? '-'}/100`;
+            document.getElementById('m-content').innerHTML = `
+                <div class="bg-healyou-50 p-3.5 rounded-xl text-xs"><strong>Alasan Skor Esai:</strong> ${esc(ev.alasan_singkat)}</div>
+                <div><strong>1. Situasi:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 whitespace-pre-wrap">${esc(st.situasi)}</p></div>
+                <div><strong>2. Tugas:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 whitespace-pre-wrap">${esc(st.tugas)}</p></div>
+                <div><strong>3. Aksi:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 whitespace-pre-wrap">${esc(st.aksi)}</p></div>
+                <div><strong>4. Hasil:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 whitespace-pre-wrap">${esc(st.hasil)}</p></div>
+                <div><strong>Portofolio / Keahlian:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 break-all">${esc(c.keahlian_khusus)}</p></div>
+                <div><strong>Komitmen:</strong><p class="bg-gray-50 p-2.5 rounded-xl mt-0.5 whitespace-pre-wrap">${esc(c.komitmen_cepat)}</p></div>
+            `;
+            document.getElementById('detail-modal').classList.remove('hidden');
+        });
+
+        window.exportFile = function(type) {
+            const list = getFilteredSorted();
+            if (list.length === 0) return;
+            const rows = list.map((c, i) => {
+                const ev = c.evaluasi || {};
+                const st = c.star || {};
+                return {
+                    "Peringkat": i + 1, "Kode Hasil": sanitizeCell(c.kode_hasil), "Nama Lengkap": sanitizeCell(c.nama), "WhatsApp": sanitizeCell(c.whatsapp),
+                    "Divisi Utama": sanitizeCell(ROLE_NAMES[c.peran_pilihan] || c.peran_pilihan), "Divisi Cadangan": sanitizeCell(ROLE_NAMES[c.peran_cadangan] || c.peran_cadangan || "-"),
+                    "Total Skor (100)": ev.total_skor ?? "", "Skor SJT (40)": ev.skor_sjt ?? "", "Skor Esai (60)": ev.skor_esai ?? "", "BARS Esai (1-5)": ev.bars_esai ?? "",
+                    "Status Prioritas": sanitizeCell(ev.status_label || ""), "Alasan Evaluasi": sanitizeCell(ev.alasan_singkat || ""),
+                    "STAR - Situasi": sanitizeCell(st.situasi), "STAR - Tugas": sanitizeCell(st.tugas), "STAR - Aksi": sanitizeCell(st.aksi), "STAR - Hasil": sanitizeCell(st.hasil),
+                    "Portofolio / Keahlian": sanitizeCell(c.keahlian_khusus), "Komitmen": sanitizeCell(c.komitmen_cepat)
+                };
+            });
+
+            if (type === 'xlsx' && typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.json_to_sheet(rows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Peringkat Relawan");
+                XLSX.writeFile(wb, "Peringkat_Relawan_Muslimah_Healing_Day.xlsx");
+            } else {
+                const headers = Object.keys(rows[0]);
+                const csv = [headers.join(","), ...rows.map(r => headers.map(h => `"${String(r[h] ?? '').replace(/"/g, '""')}"`).join(","))].join("\n");
+                const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "Peringkat_Relawan_Muslimah_Healing_Day.csv";
+                a.click();
+            }
+        };
+    </script>
+</body>
+</html>
