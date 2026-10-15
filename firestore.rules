@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // Koleksi Data Pribadi & Jawaban Mentah (Hanya Admin HR yang dapat membaca)
+    match /pendaftar_relawan/{docId} {
+      allow read: if isAdmin();
+
+      allow create: if request.resource.data.keys().hasOnly([
+                      'kode_hasil', 'nama', 'whatsapp', 'gender', 'ketersediaan',
+                      'setuju_nda_privasi', 'persetujuan_pdp', 'reaksi_tekanan',
+                      'motivasi', 'peran_pilihan', 'peran_cadangan', 'jawaban_sjt',
+                      'star', 'keahlian_khusus', 'komitmen_cepat', 'created_at'
+                    ])
+                    && request.resource.data.kode_hasil is string
+                    && request.resource.data.kode_hasil.matches('^[A-Z0-9]{12}$')
+                    && request.resource.data.nama is string
+                    && request.resource.data.nama.size() >= 2
+                    && request.resource.data.nama.size() <= 100
+                    && request.resource.data.whatsapp is string
+                    && request.resource.data.whatsapp.matches('^628[1-9][0-9]{6,11}$')
+                    && request.resource.data.gender == 'female'
+                    && request.resource.data.ketersediaan == 'full'
+                    && request.resource.data.setuju_nda_privasi == true
+                    && request.resource.data.persetujuan_pdp == true;
+
+      allow update, delete: if false;
+    }
+
+    // Koleksi Hasil Publik Tanpa PII (Hanya bisa dibaca per kode 12 karakter oleh pendaftar)
+    match /hasil_seleksi/{kodeHasil} {
+      allow get: if kodeHasil.matches('^[A-Z0-9]{12}$');
+      allow list: if isAdmin();
+      allow write: if false; // Hanya ditulis oleh Cloud Functions (Admin SDK)
+    }
+  }
+}
