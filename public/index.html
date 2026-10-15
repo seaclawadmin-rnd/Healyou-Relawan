@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Relawan - Muslimah Healing Day by Heal You</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        healyou: {
+                            50: '#faf7ff', 100: '#f3ebff', 200: '#e5d4ff',
+                            pink: '#e5b2f7', blue: '#84b6ff',
+                            500: '#9b87f5', 600: '#7c6ee6', 700: '#6556cc',
+                            800: '#4a3e99', 900: '#2e2559',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: linear-gradient(135deg, #fdfaff 0%, #f3f7ff 100%); color: #2e2559; }
+        .healyou-gradient { background: linear-gradient(90deg, #e5b2f7 0%, #84b6ff 100%); }
+        .healyou-btn-gradient { background: linear-gradient(90deg, #9b87f5 0%, #6d9eeb 100%); }
+        .healyou-btn-gradient:hover { background: linear-gradient(90deg, #836ce8 0%, #5689db 100%); }
+        .fade-in { animation: fadeIn 0.35s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-step { display: none !important; }
+        input[type="radio"]:checked + label, label:has(input[type="radio"]:checked) {
+            background-color: #f6f2ff; border-color: #7c6ee6; box-shadow: 0 0 0 1px #7c6ee6;
+        }
+        input[type="radio"]:focus-visible + label { outline: 2px solid #6556cc; outline-offset: 2px; }
+    </style>
+</head>
+<body class="min-h-screen font-sans flex flex-col justify-between items-center p-4 selection:bg-healyou-500 selection:text-white">
+
+    <div id="custom-toast" role="status" aria-live="polite" class="fixed top-5 right-5 z-50 max-w-sm bg-healyou-900 text-white px-5 py-4 rounded-xl shadow-xl border border-healyou-500/40 flex items-start space-x-3 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-none">
+        <svg class="w-5 h-5 text-healyou-pink flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="flex-1 text-sm font-normal leading-relaxed" id="custom-toast-msg"></div>
+        <button type="button" onclick="hideNotification()" class="text-healyou-200 hover:text-white" aria-label="Tutup">✕</button>
+    </div>
+
+    <main class="w-full max-w-3xl bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl overflow-hidden ring-1 ring-healyou-200 my-auto">
+        <header class="healyou-gradient p-8 text-center relative overflow-hidden">
+            <div class="relative z-10 flex flex-col items-center justify-center mb-3">
+                <img src="Heal You_20260804_222305_0000.jpg" alt="Logo Heal You" 
+                     class="w-28 h-28 object-cover rounded-3xl shadow-md border-2 border-white/60 mb-2"
+                     onerror="this.style.display='none'; document.getElementById('healyou-svg-logo').classList.remove('hidden');">
+                <div id="healyou-svg-logo" class="hidden w-28 h-28 rounded-3xl healyou-gradient shadow-md border-2 border-white/70 flex flex-col items-center justify-center p-2">
+                    <svg viewBox="0 0 100 75" class="w-14 h-12 fill-white drop-shadow-sm" aria-hidden="true">
+                        <path d="M35 22 C33 17, 38 15, 40 20 C42 14, 48 14, 49 20 C50 12, 56 12, 56 20 C59 15, 64 17, 62 22 C66 19, 70 23, 65 26 C55 23, 45 23, 35 22 Z"/>
+                        <path d="M40 25 C36 28, 35 34, 33 38 C32 40, 34 41, 34 43 C33 45, 34 48, 38 49 C40 49, 41 53, 38 56 C34 59, 28 60, 26 62 C34 64, 44 61, 48 57 C46 61, 40 65, 36 67 C46 69, 58 66, 67 61 C64 56, 61 48, 62 39 C63 30, 56 23, 47 23 C44 23, 42 24, 40 25 Z"/>
+                    </svg>
+                    <span class="font-serif text-white text-sm font-semibold drop-shadow-sm">Heal You</span>
+                </div>
+            </div>
+            <h1 class="font-serif text-3xl md:text-4xl font-bold text-white drop-shadow-sm mb-1.5 relative z-10">Muslimah Healing Day</h1>
+            <p class="text-white/95 text-sm md:text-base font-medium tracking-wide relative z-10">Pendaftaran & Pemetaan Peran Relawan — by Heal You</p>
+        </header>
+
+        <div id="form-container" class="p-6 md:p-10 relative">
+            <div id="progress-wrapper" class="mb-8 hidden">
+                <div class="flex justify-between items-center text-xs font-semibold text-healyou-600 mb-2">
+                    <span id="step-label">Langkah 1 dari 6</span>
+                    <span id="step-pct">17%</span>
+                </div>
+                <div class="w-full bg-healyou-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="healyou-gradient h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- STEP 0 -->
+            <div id="step-0" class="form-step fade-in">
+                <h2 class="font-serif text-2xl font-semibold mb-3 text-healyou-900">Selamat Datang, Calon Relawan Heal You</h2>
+                <p class="mb-5 text-gray-600 leading-relaxed text-sm md:text-base">
+                    Terima kasih atas niat tulus Anda untuk berkontribusi menghadirkan ruang pulih yang aman, nyaman, dan penuh empati di <strong>Muslimah Healing Day</strong>. Formulir ini mencakup studi kasus peran dan cerita pengalaman tanpa batas waktu hitung mundur.
+                </p>
+                <div class="bg-healyou-50 border border-healyou-200 p-5 rounded-2xl mb-5 text-sm text-healyou-900">
+                    <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                        <li><strong>Tanpa OTP & Tanpa Batas Waktu:</strong> Kerjakan dengan tenang. Isian tersimpan otomatis di perangkat Anda jika halaman tertutup.</li>
+                        <li><strong>Hasil Langsung & Kode Unik:</strong> Setelah dikirim, sistem memerlukan waktu 10–30 detik untuk menampilkan urutan prioritas beserta kode unik 12 karakter.</li>
+                    </ul>
+                </div>
+
+                <label for="nda-consent" class="flex items-start p-4 mb-3 border border-healyou-200 bg-white rounded-2xl cursor-pointer hover:bg-healyou-50/60 transition-colors">
+                    <input type="checkbox" id="nda-consent" class="mt-1 h-4 w-4 text-healyou-600 border-gray-300 rounded">
+                    <span class="ml-3 text-xs md:text-sm text-gray-700 leading-relaxed">
+                        <strong>Komitmen Etika Ruang Aman Peserta (Safe Space):</strong> Saya berkomitmen menjaga kerahasiaan identitas dan privasi seluruh peserta Muslimah Healing Day.
+                    </span>
+                </label>
+
+                <label for="pdp-consent" class="flex items-start p-4 mb-6 border border-healyou-200 bg-white rounded-2xl cursor-pointer hover:bg-healyou-50/60 transition-colors">
+                    <input type="checkbox" id="pdp-consent" class="mt-1 h-4 w-4 text-healyou-600 border-gray-300 rounded">
+                    <span class="ml-3 text-xs md:text-sm text-gray-700 leading-relaxed">
+                        <strong>Persetujuan Pemrosesan Data & Penilaian Otomatis:</strong> Saya menyetujui data saya diproses secara otomatis oleh server panitia (termasuk melalui model AI pihak ketiga) guna menyusun urutan prioritas relawan. Keputusan akhir ditentukan oleh Tim HR. Kontak keberatan/penghapusan data: <strong class="kontak-display text-healyou-700"></strong>.
+                    </span>
+                </label>
+
+                <button type="button" onclick="validateStep0()" class="w-full healyou-btn-gradient text-white font-semibold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg">
+                    Mulai Pengisian Formulir
+                </button>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="step-1" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Data Diri & Ketersediaan Waktu</h2>
+                <div class="space-y-5">
+                    <div>
+                        <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="fullname" maxlength="100" oninput="saveFormDraft()" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm" placeholder="Masukkan nama lengkap">
+                    </div>
+                    <div>
+                        <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp Aktif</label>
+                        <input type="tel" id="whatsapp" maxlength="20" oninput="saveFormDraft()" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl outline-none text-sm" placeholder="Contoh: 081234567890">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative"><input type="radio" name="gender" id="gender-f" value="female" class="peer sr-only"><label for="gender-f" class="block text-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-healyou-50 text-sm font-medium">Perempuan</label></div>
+                            <div class="relative"><input type="radio" name="gender" id="gender-m" value="male" class="peer sr-only"><label for="gender-m" class="block text-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-healyou-50 text-sm font-medium">Laki-laki</label></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Komitmen Kehadiran Penuh</label>
+                        <div class="space-y-2.5">
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="availability" value="full" class="mt-0.5 text-healyou-600"><span class="ml-3 text-gray-700 text-sm">Ya, bersedia mengikuti Technical Meeting & hadir penuh Hari-H.</span></label>
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="availability" value="partial" class="mt-0.5 text-healyou-600"><span class="ml-3 text-gray-700 text-sm">Hanya hadir sebagian waktu / berhalangan pembekalan.</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(0)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="validateStep1()" class="healyou-btn-gradient text-white font-semibold py-2.5 px-7 rounded-xl">Lanjut</button>
+                </div>
+            </div>
+
+            <!-- Penolakan Sopan -->
+            <div id="step-reject" class="form-step hidden-step text-center py-10">
+                <h2 class="font-serif text-2xl font-semibold mb-3 text-healyou-900">Terima Kasih Atas Antusiasme Anda</h2>
+                <p id="reject-reason-text" class="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed text-sm"></p>
+                <button type="button" onclick="prevStep(1)" class="text-xs text-healyou-600 underline">Kembali jika salah memilih</button>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step-2" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Gaya Komunikasi & Motivasi</h2>
+                <div class="space-y-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-3">1. Saat acara, koordinator menegur Anda di depan tim karena kendala divisi lain. Respons Anda?</label>
+                        <div class="space-y-3">
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="pressure_reaction" value="defend" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Menyampaikan duduk perkara secara terbuka saat itu juga.</span></label>
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="pressure_reaction" value="silent" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Mendengarkan dengan tenang, lalu mengambil jeda singkat menata fokus.</span></label>
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="pressure_reaction" value="swallow" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Membereskan kendala lapangan dulu, lalu klarifikasi empat mata nanti.</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-3">2. Tujuan utama relawan di acara ini?</label>
+                        <div class="space-y-3">
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="motivation" value="community" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Menambah relasi positif dan belajar mengelola ruang ramah psikologis.</span></label>
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="motivation" value="portfolio" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Mengasah manajemen acara, menambah portofolio, dan jejaring profesional.</span></label>
+                            <label class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50"><input type="radio" name="motivation" value="altruism" onchange="saveFormDraft()" class="mt-1"><span class="ml-3 text-gray-700 text-sm">Mendedikasikan waktu dan tenaga sebagai kontribusi sosial.</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(1)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="validateStep2()" class="healyou-btn-gradient text-white font-semibold py-2.5 px-7 rounded-xl">Lanjut</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="step-3" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Pilihan Divisi & Peran</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 mb-6" id="role-container"></div>
+                <div class="bg-healyou-50 p-4 rounded-2xl border">
+                    <label for="secondary-role" class="block text-sm font-semibold text-healyou-900 mb-1.5">Pilihan Divisi Cadangan <span class="text-xs font-normal text-gray-500">(Opsional)</span></label>
+                    <select id="secondary-role" onchange="saveFormDraft()" class="w-full px-3.5 py-2.5 border rounded-xl bg-white text-sm outline-none">
+                        <option value="">-- Tidak memilih divisi cadangan --</option>
+                    </select>
+                </div>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(2)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="validateStep3()" class="healyou-btn-gradient text-white font-semibold py-2.5 px-7 rounded-xl">Lanjut</button>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div id="step-4" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Studi Kasus: <span class="role-title-display text-healyou-600"></span></h2>
+                <div id="sjt-container" class="space-y-8"></div>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(3)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="validateStep4()" class="healyou-btn-gradient text-white font-semibold py-2.5 px-7 rounded-xl">Lanjut</button>
+                </div>
+            </div>
+
+            <!-- STEP 5 -->
+            <div id="step-5" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Pengalaman Terdahulu: <span class="role-title-display text-healyou-600"></span></h2>
+                <div class="bg-healyou-50 p-4 rounded-xl mb-6 border-l-4 border-healyou-500">
+                    <p id="bei-prompt" class="font-medium text-healyou-900 text-sm leading-relaxed"></p>
+                </div>
+                <div class="space-y-4">
+                    <div><div class="flex justify-between mb-1"><label for="star-s" class="text-sm font-semibold">1. Situasi</label><span id="count-star-s" class="text-xs text-gray-400">0 / 40–1500</span></div><textarea id="star-s" maxlength="1500" oninput="updateCharCount('star-s'); saveFormDraft();" rows="2" class="w-full px-3.5 py-2.5 border rounded-xl text-sm" placeholder="Kapan dan di mana..."></textarea></div>
+                    <div><div class="flex justify-between mb-1"><label for="star-t" class="text-sm font-semibold">2. Tugas</label><span id="count-star-t" class="text-xs text-gray-400">0 / 40–1500</span></div><textarea id="star-t" maxlength="1500" oninput="updateCharCount('star-t'); saveFormDraft();" rows="2" class="w-full px-3.5 py-2.5 border rounded-xl text-sm" placeholder="Tanggung jawab Anda..."></textarea></div>
+                    <div><div class="flex justify-between mb-1"><label for="star-a" class="text-sm font-semibold">3. Langkah Aksi</label><span id="count-star-a" class="text-xs text-gray-400">0 / 40–1500</span></div><textarea id="star-a" maxlength="1500" oninput="updateCharCount('star-a'); saveFormDraft();" rows="3" class="w-full px-3.5 py-2.5 border rounded-xl text-sm" placeholder="Langkah pribadi (gunakan 'Saya')..."></textarea></div>
+                    <div><div class="flex justify-between mb-1"><label for="star-r" class="text-sm font-semibold">4. Hasil</label><span id="count-star-r" class="text-xs text-gray-400">0 / 40–1500</span></div><textarea id="star-r" maxlength="1500" oninput="updateCharCount('star-r'); saveFormDraft();" rows="2" class="w-full px-3.5 py-2.5 border rounded-xl text-sm" placeholder="Hasil akhir..."></textarea></div>
+                </div>
+                <div class="mt-6 pt-6 border-t">
+                    <label id="skill-prompt-label" for="skill-input" class="block text-sm font-semibold mb-2"></label>
+                    <input type="text" id="skill-input" maxlength="500" oninput="saveFormDraft()" class="w-full px-3.5 py-2.5 border rounded-xl text-sm" placeholder="Portofolio / keahlian...">
+                </div>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(4)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="validateStep5()" class="healyou-btn-gradient text-white font-semibold py-2.5 px-7 rounded-xl">Lanjut</button>
+                </div>
+            </div>
+
+            <!-- STEP 6 -->
+            <div id="step-6" class="form-step hidden-step">
+                <h2 class="font-serif text-2xl font-semibold mb-1 text-healyou-900">Refleksi & Komitmen</h2>
+                <textarea id="final-commitment" maxlength="600" oninput="saveFormDraft()" rows="3" class="w-full px-4 py-3 border rounded-xl text-sm" placeholder="Tuliskan komitmen Anda..."></textarea>
+                <div class="mt-8 flex justify-between items-center pt-4 border-t">
+                    <button type="button" onclick="prevStep(5)" class="text-healyou-600 text-sm">Kembali</button>
+                    <button type="button" onclick="submitForm()" id="submit-btn" class="healyou-btn-gradient text-white font-semibold py-3 px-8 rounded-xl shadow-md">Kirim Pendaftaran</button>
+                </div>
+            </div>
+
+            <!-- STEP 7 -->
+            <div id="step-7" class="form-step hidden-step text-center py-6">
+                <div id="waiting-evaluation-box" class="text-center py-8">
+                    <div class="w-14 h-14 border-4 border-healyou-200 border-t-healyou-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    <h2 class="font-serif text-2xl font-semibold text-healyou-900 mb-2">Memproses Pendaftaran Anda...</h2>
+                    <p class="text-xs md:text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
+                        Mohon tunggu 10–30 detik. Simpan kode 12 karakter Anda:
+                    </p>
+                    <div class="mt-5 inline-block bg-healyou-50 border border-healyou-200 px-5 py-3 rounded-2xl">
+                        <span id="live-result-code" class="font-mono text-xl font-bold text-healyou-800 tracking-widest">------------</span>
+                    </div>
+                </div>
+
+                <div id="final-result-box" class="hidden space-y-5 text-left">
+                    <div class="text-center">
+                        <span id="res-status-badge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2"></span>
+                        <h2 class="font-serif text-2xl font-bold text-healyou-900">Ringkasan Hasil Seleksi Awal</h2>
+                    </div>
+                    <div class="bg-healyou-50 border p-5 rounded-2xl flex justify-between items-center">
+                        <div><span class="text-xs text-gray-500 block">Kode Akses</span><span id="final-code-display" class="font-mono text-xl font-bold text-healyou-800 tracking-widest"></span></div>
+                        <div class="text-right"><span class="text-xs text-gray-500 block">Skor</span><span id="final-score-display" class="text-2xl font-bold text-healyou-700"></span><span id="final-breakdown-display" class="block text-[11px] text-gray-500"></span></div>
+                    </div>
+                    <div class="bg-white border p-5 rounded-2xl text-xs space-y-2"><p id="final-reason-display" class="text-gray-700 leading-relaxed"></p></div>
+                    <div class="text-center pt-2"><a id="goto-hasil-link" href="hasil.html" class="text-xs font-semibold text-healyou-600 underline">Buka Halaman Cek Hasil Mandiri →</a></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full max-w-3xl text-center py-4 flex justify-between items-center px-2 text-xs text-gray-400">
+        <span>© 2026 Heal You — Muslimah Healing Day</span>
+        <div class="space-x-4"><a href="hasil.html" class="text-healyou-600 underline">Cek Hasil</a><a href="admin.html" class="text-healyou-600 underline">🔒 Dasbor Panitia</a></div>
+    </footer>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 6;
+        let toastTimeout;
+        const DRAFT_KEY = 'healyou_mhd_draft_v4';
+
+        const stepTitles = { 1: "Data Diri", 2: "Gaya Komunikasi", 3: "Divisi", 4: "Studi Kasus", 5: "STAR", 6: "Komitmen" };
+
+        function showNotification(msg) {
+            const toast = document.getElementById('custom-toast');
+            const msgEl = document.getElementById('custom-toast-msg');
+            if (!toast || !msgEl) return;
+            msgEl.textContent = msg;
+            toast.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-x-0', 'opacity-100');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(hideNotification, 4500);
+        }
+
+        function hideNotification() {
+            const toast = document.getElementById('custom-toast');
+            if (!toast) return;
+            toast.classList.add('translate-x-full', 'opacity-0', 'pointer-events-none');
+            toast.classList.remove('translate-x-0', 'opacity-100');
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        const roleData = {
+            pfa: {
+                title: "Pendamping Psikologis (PFA)",
+                desc: "Mendampingi peserta yang membutuhkan ruang tenang dengan empati & Active Listening.",
+                sjts: [
+                    { scenario: "Saat sesi pemulihan berlangsung, seorang peserta menangis tersedu-sedu dan napasnya memburu cepat.", options: [{ code: "A", text: "Menghampiri dengan tenang, menawarkan pindah ke Ruang Tenang, lalu memandu napas perlahan." }, { code: "B", text: "Memeluk dan memberikan nasihat keagamaan agar ia segera berhenti menangis." }, { code: "C", text: "Menanyakan detail trauma masa lalunya saat itu juga di tengah ruangan." }] },
+                    { scenario: "Di Ruang Tenang, seorang peserta meminta nomor pribadi Anda untuk berkonsultasi setiap malam.", options: [{ code: "A", text: "Mengapresiasi, menjelaskan batas peran, dan merujuk ke layanan profesional mitra Heal You." }, { code: "B", text: "Memberikan nomor pribadi Anda karena merasa tidak tega menolak." }, { code: "C", text: "Menolak secara kaku dan langsung mengakhiri sesi pendampingan." }] },
+                    { scenario: "Anda mendampingi peserta yang kisahnya sangat mirip dengan luka masa lalu Anda, sehingga dada Anda sesak.", options: [{ code: "A", text: "Menjaga napas, lalu memberi isyarat kepada rekan tim PFA untuk bergantian mendampingi." }, { code: "B", text: "Ikut menangis bersama peserta dan menceritakan pengalaman pribadi Anda." }, { code: "C", text: "Memaksakan diri tetap mendampingi sendirian hingga tuntas." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman saat mendengarkan seseorang dalam kondisi krisis emosional.",
+                skillPrompt: "Latar belakang pendidikan / pelatihan PFA:"
+            },
+            floordirector: {
+                title: "Floor Director & Timekeeper",
+                desc: "Mengendalikan ketepatan durasi rundown di panggung dan transisi acara.",
+                sjts: [
+                    { scenario: "Narasumber utama terlambat 25 menit karena macet, sementara peserta sudah duduk di ruangan.", options: [{ code: "A", text: "Berkoordinasi dengan MC untuk memajukan sesi pengantar interaktif ringan." }, { code: "B", text: "Meminta peserta menunggu tanpa aktivitas selama 25 menit." }, { code: "C", text: "Menghubungi narasumber terus-menerus dari pinggir panggung." }] },
+                    { scenario: "Sesi psikolog melewati batas waktu 10 menit.", options: [{ code: "A", text: "Menunjukkan papan waktu dan berbisik ke MC untuk mengintegrasikan kesimpulan." }, { code: "B", text: "Membiarkan pemateri terus berbicara tanpa batas waktu." }, { code: "C", text: "Meminta operator mematikan mikrofon panggung secara tiba-tiba." }] },
+                    { scenario: "Dua anggota tim teknis berdebat lewat HT saat transisi panggung.", options: [{ code: "A", text: "Mengambil alih HT dengan tenang, lalu menengahi secara terpisah seusai transisi." }, { code: "B", text: "Menegur keduanya dengan keras langsung melalui HT." }, { code: "C", text: "Mematikan HT Anda dan membiarkan transisi berjalan tanpa komando." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman saat jadwal kegiatan mengalami perubahan mendadak.",
+                skillPrompt: "Pengalaman stage management / timekeeper:"
+            },
+            mc: {
+                title: "MC (Master of Ceremony)",
+                desc: "Memandu acara dengan hangat dan menjembatani emosi audiens.",
+                sjts: [
+                    { scenario: "Saat peserta terharu, Floor Director memberi aba-aba sesi ditutup dalam 1 menit.", options: [{ code: "A", text: "Masuk pada jeda kalimat, merangkum pesan inti dengan empatik, dan menutup sesi." }, { code: "B", text: "Mengabaikan aba-aba dan membiarkan sesi berjalan 10 menit lebih lama." }, { code: "C", text: "Memotong kalimat dengan nada cepat dan ceria." }] },
+                    { scenario: "Narasumber melontarkan candaan kurang pas sehingga ruangan hening.", options: [{ code: "A", text: "Menyambung dengan senyum dan mengemasnya menjadi sudut pandang positif." }, { code: "B", text: "Melanjutkan ke pertanyaan berikutnya seolah tidak terjadi apa-apa." }, { code: "C", text: "Mengoreksi ucapan narasumber secara terbuka di atas panggung." }] },
+                    { scenario: "Jeda 10 menit karena proyektor rusak, peserta mulai membuka ponsel.", options: [{ code: "A", text: "Mengajak peserta relaksasi pernapasan singkat dan berbagi kalimat syukur." }, { code: "B", text: "Membacakan profil narasumber dan susunan acara dari awal." }, { code: "C", text: "Meninggalkan panggung menuju meja operator." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman saat memandu audiens yang awalnya kurang responsif.",
+                skillPrompt: "Tautan Portofolio Public Speaking (https://...):"
+            },
+            registrasi: {
+                title: "Tim Registrasi & Data",
+                desc: "Penyambutan, verifikasi tiket, dan data kehadiran.",
+                sjts: [
+                    { scenario: "Scanner tiket gangguan jaringan, antrean memanjang.", options: [{ code: "A", text: "Beralih ke spreadsheet offline dan membagi antrean berdasarkan abjad." }, { code: "B", text: "Meminta peserta menunggu 15 menit sambil merestart aplikasi." }, { code: "C", text: "Membuka pintu masuk tanpa pencatatan nama." }] },
+                    { scenario: "Bukti tiket peserta tidak terdaftar di sistem.", options: [{ code: "A", text: "Mempersilakan ke Meja Bantuan dengan sopan sambil cek transfer." }, { code: "B", text: "Berdiskusi panjang di meja antrean utama." }, { code: "C", text: "Menolak kehadiran peserta secara langsung." }] },
+                    { scenario: "Gelang VIP kurang 5 buah saat rombongan tamu tiba.", options: [{ code: "A", text: "Memberikan gelang reguler dengan penanda khusus yang rapi & infokan Usher." }, { code: "B", text: "Meminta tamu berdiri menunggu sementara Anda mencari stok." }, { code: "C", text: "Menjelaskan kesalahan logistik kepada tamu." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman melayani antrean banyak orang dengan teliti.",
+                skillPrompt: "Aplikasi pengolah data yang dikuasai (Excel/Sheets):"
+            },
+            usher: {
+                title: "Usher & Hospitality",
+                desc: "Pengaturan kursi, penyambutan tamu, dan ketertiban ruangan.",
+                sjts: [
+                    { scenario: "Peserta mengeluh tempat duduk terlalu dingin kena AC.", options: [{ code: "A", text: "Mendengarkan empatik, mencarikan kursi alternatif, koordinasi teknisi AC." }, { code: "B", text: "Meminta maaf dan memanggil koordinator divisi." }, { code: "C", text: "Menjelaskan zona kursi sudah ditetapkan panitia." }] },
+                    { scenario: "Kursi khusus undangan diduduki peserta reguler.", options: [{ code: "A", text: "Mengantar tamu ke kursi cadangan setara dulu, lalu santun mengarahkan peserta reguler." }, { code: "B", text: "Menegur peserta reguler secara langsung untuk segera berdiri." }, { code: "C", text: "Membiarkan tamu mencari kursi kosong di belakang." }] },
+                    { scenario: "Peserta terlambat membuka pintu utama dengan suara keras.", options: [{ code: "A", text: "Menyambut senyum tenang, menahan pintu agar tak berbunyi, mengantar ke kursi terdekat." }, { code: "B", text: "Mengarahkan langsung ke kursi kosong di depan panggung." }, { code: "C", text: "Melarang masuk dan meminta menunggu di luar." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman melayani tamu atau peserta dengan tuntutan tinggi.",
+                skillPrompt: "Pengalaman hospitality / customer service:"
+            },
+            perlengkapan: {
+                title: "Perlengkapan, Logistik & Konsumsi",
+                desc: "Kesiapan AV, tata ruang, logistik, dan konsumsi.",
+                sjts: [
+                    { scenario: "30 menit sebelum acara, diminta mengubah jalur tengah kursi.", options: [{ code: "A", text: "Mengajak tim lintas divisi bergotong-royong membagi blok kursi." }, { code: "B", text: "Mengerjakan sendirian semampunya melewati waktu buka." }, { code: "C", text: "Menyampaikan waktu terlalu singkat dan menolak." }] },
+                    { scenario: "Mikrofon utama putus-putus 10 menit sebelum acara.", options: [{ code: "A", text: "Segera menyiapkan mic cadangan dan baterai baru serta uji suara." }, { code: "B", text: "Melaporkan ke Floor Director dan menunggu instruksi." }, { code: "C", text: "Mengetuk-ngetuk kepala mic lama." }] },
+                    { scenario: "Antrean konsumsi menumpuk di satu meja saat istirahat.", options: [{ code: "A", text: "Memecah titik distribusi jadi dua jalur kanan-kiri." }, { code: "B", text: "Mengatur antrean satu per satu di meja utama." }, { code: "C", text: "Meminta waktu istirahat diperpanjang 20 menit." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman menyelesaikan kendala logistik mendesak.",
+                skillPrompt: "Keahlian teknis / SIM kendaraan:"
+            },
+            dokumentasi: {
+                title: "Dokumentasi & Visual",
+                desc: "Dokumentasi estetik dengan menjunjung tinggi etika privasi.",
+                sjts: [
+                    { scenario: "Peserta menangis haru, namun acara menjaga privasi (safe space).", options: [{ code: "A", text: "Mengambil sudut siluet belakang, detail tangan, atau suasana luas tanpa wajah." }, { code: "B", text: "Memotret dari jarak jauh dengan lensa tele." }, { code: "C", text: "Mengambil close-up wajah karena nilai emosionalnya kuat." }] },
+                    { scenario: "Memori kamera error saat narasumber naik panggung.", options: [{ code: "A", text: "Segera memakai perangkat cadangan / ponsel sambil mengganti kartu memori." }, { code: "B", text: "Memformat ulang kartu memori di kamera saat itu juga." }, { code: "C", text: "Melewatkan momen pembuka." }] },
+                    { scenario: "Ruangan diredupkan dan panitia melarang flash.", options: [{ code: "A", text: "Menyesuaikan ISO dan bukaan lensa, memanfaatkan cahaya panggung." }, { code: "B", text: "Memakai flash sesekali secara diam-diam." }, { code: "C", text: "Tidak memotret sama sekali." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman menghasilkan karya visual di kondisi menantang.",
+                skillPrompt: "Tautan Portofolio (https://...):"
+            },
+            sponsor: {
+                title: "Kemitraan & Sponsorship",
+                desc: "Menjalin komunikasi strategis dengan brand/sponsor.",
+                sjts: [
+                    { scenario: "Brand ragu karena kata 'Healing' terkesan sedih.", options: [{ code: "A", text: "Menjelaskan acara berfokus pada kebangkitan positif yang selaras dengan brand." }, { code: "B", text: "Menawarkan ukuran logo lebih besar di spanduk utama." }, { code: "C", text: "Mengirimkan penjelasan teoritis psikologis." }] },
+                    { scenario: "Sponsor memberi dana besar tapi minta promosi memotong sesi pemulihan.", options: [{ code: "A", text: "Bernegosiasi menawarkan paket eksposur di lobi dan goodie bag." }, { code: "B", text: "Menyetujui pemotongan waktu sesi pemulihan." }, { code: "C", text: "Menolak tawaran kerja sama saat itu juga." }] },
+                    { scenario: "H-3 sponsor membatalkan 500 goodie bag sepihak.", options: [{ code: "A", text: "Menghubungi mitra lapis kedua dan UMKM lokal untuk kolaborasi cepat." }, { code: "B", text: "Mengalihkan menjadi voucher digital setelah acara." }, { code: "C", text: "Mendesak sponsor dengan nada keras." }] }
+                ],
+                beiPrompt: "Ceritakan pengalaman negosiasi sponsorship atau kemitraan.",
+                skillPrompt: "Pengalaman pencarian dana/sponsorship:"
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRoles();
+            updateProgress();
+            restoreFormDraft();
+        });
+
+        function renderRoles() {
+            const container = document.getElementById('role-container');
+            const secondarySelect = document.getElementById('secondary-role');
+            container.innerHTML = '';
+            secondarySelect.innerHTML = '<option value="">-- Tidak memilih divisi cadangan --</option>';
+
+            for (const [id, role] of Object.entries(roleData)) {
+                container.innerHTML += `
+                    <div class="relative">
+                        <input type="radio" name="role_choice" id="role-${id}" value="${id}" onchange="saveFormDraft()" class="peer sr-only">
+                        <label for="role-${id}" class="block h-full p-4 border rounded-xl cursor-pointer hover:bg-healyou-50">
+                            <h3 class="font-semibold text-healyou-900 mb-1 text-sm md:text-base">${escapeHtml(role.title)}</h3>
+                            <p class="text-xs text-gray-600 leading-relaxed">${escapeHtml(role.desc)}</p>
+                        </label>
+                    </div>
+                `;
+                secondarySelect.innerHTML += `<option value="${escapeHtml(id)}">${escapeHtml(role.title)}</option>`;
+            }
+        }
+
+        function updateCharCount(id) {
+            const el = document.getElementById(id);
+            const badge = document.getElementById(`count-${id}`);
+            if (!el || !badge) return;
+            const val = el.value.trim().length;
+            badge.textContent = val >= 40 ? `✓ ${val} / 1500` : `${val} / 40–1500`;
+            badge.className = val >= 40 ? 'text-xs font-semibold text-healyou-600' : 'text-xs text-gray-400';
+        }
+
+        function saveFormDraft() {
+            try {
+                const draft = {
+                    fullname: document.getElementById('fullname')?.value || '',
+                    whatsapp: document.getElementById('whatsapp')?.value || '',
+                    pressure_reaction: document.querySelector('input[name="pressure_reaction"]:checked')?.value || '',
+                    motivation: document.querySelector('input[name="motivation"]:checked')?.value || '',
+                    role_choice: document.querySelector('input[name="role_choice"]:checked')?.value || '',
+                    secondary_role: document.getElementById('secondary-role')?.value || '',
+                    star_s: document.getElementById('star-s')?.value || '',
+                    star_t: document.getElementById('star-t')?.value || '',
+                    star_a: document.getElementById('star-a')?.value || '',
+                    star_r: document.getElementById('star-r')?.value || '',
+                    skill_input: document.getElementById('skill-input')?.value || '',
+                    final_commitment: document.getElementById('final-commitment')?.value || ''
+                };
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            } catch (e) {}
+        }
+
+        function restoreFormDraft() {
+            try {
+                const raw = localStorage.getItem(DRAFT_KEY);
+                if (!raw) return;
+                const d = JSON.parse(raw);
+                if (d.fullname) document.getElementById('fullname').value = d.fullname;
+                if (d.whatsapp) document.getElementById('whatsapp').value = d.whatsapp;
+                if (d.pressure_reaction) {
+                    const r = document.querySelector(`input[name="pressure_reaction"][value="${CSS.escape(d.pressure_reaction)}"]`);
+                    if (r) r.checked = true;
+                }
+                if (d.motivation) {
+                    const m = document.querySelector(`input[name="motivation"][value="${CSS.escape(d.motivation)}"]`);
+                    if (m) m.checked = true;
+                }
+                if (d.role_choice) {
+                    const rc = document.querySelector(`input[name="role_choice"][value="${CSS.escape(d.role_choice)}"]`);
+                    if (rc) rc.checked = true;
+                }
+                if (d.secondary_role) document.getElementById('secondary-role').value = d.secondary_role;
+                if (d.star_s) document.getElementById('star-s').value = d.star_s;
+                if (d.star_t) document.getElementById('star-t').value = d.star_t;
+                if (d.star_a) document.getElementById('star-a').value = d.star_a;
+                if (d.star_r) document.getElementById('star-r').value = d.star_r;
+                if (d.skill_input) document.getElementById('skill-input').value = d.skill_input;
+                if (d.final_commitment) document.getElementById('final-commitment').value = d.final_commitment;
+                ['star-s', 'star-t', 'star-a', 'star-r'].forEach(updateCharCount);
+            } catch (e) {}
+        }
+
+        function updateProgress() {
+            const wrapper = document.getElementById('progress-wrapper');
+            if (currentStep <= 0 || currentStep > 6) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+            wrapper.classList.remove('hidden');
+            const pct = Math.round((currentStep / totalSteps) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('step-label').textContent = `Langkah ${currentStep} dari ${totalSteps} — ${stepTitles[currentStep] || ''}`;
+            document.getElementById('step-pct').textContent = `${pct}%`;
+        }
+
+        function showStep(stepIndex) {
+            document.querySelectorAll('.form-step').forEach((el) => {
+                if (el.id === `step-${stepIndex}` || (stepIndex === -1 && el.id === 'step-reject')) {
+                    el.classList.remove('hidden-step');
+                    el.classList.add('fade-in');
+                } else {
+                    el.classList.add('hidden-step');
+                    el.classList.remove('fade-in');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep(step) { hideNotification(); currentStep = step; updateProgress(); showStep(currentStep); }
+        function prevStep(step) { hideNotification(); currentStep = step; updateProgress(); showStep(currentStep); }
+
+        function validateStep0() {
+            if (!document.getElementById('nda-consent').checked || !document.getElementById('pdp-consent').checked) {
+                showNotification("Mohon centang kedua kotak persetujuan sebelum memulai.");
+                return;
+            }
+            nextStep(1);
+        }
+
+        function validateStep1() {
+            const name = document.getElementById('fullname').value.trim();
+            let phone = document.getElementById('whatsapp').value.trim().replace(/[\s-]/g, '');
+            const gender = document.querySelector('input[name="gender"]:checked');
+            const avail = document.querySelector('input[name="availability"]:checked');
+
+            if (!name || !phone || !gender || !avail) {
+                showNotification("Mohon lengkapi seluruh isian pada langkah ini.");
+                return;
+            }
+            if (!/^(\+62|62|0)8[1-9][0-9]{6,11}$/.test(phone)) {
+                showNotification("Masukkan nomor WhatsApp aktif yang valid (Contoh: 081234567890).");
+                return;
+            }
+            if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+            if (phone.startsWith('+')) phone = phone.slice(1);
+            document.getElementById('whatsapp').value = phone;
+            saveFormDraft();
+
+            const rejectReason = document.getElementById('reject-reason-text');
+            if (gender.value === 'male') {
+                rejectReason.textContent = "Mohon maaf, demi menjaga ruang aman psikologis (safe space) peserta, seluruh relawan Muslimah Healing Day dikhususkan bagi perempuan.";
+                currentStep = -1; updateProgress(); showStep(-1); return;
+            }
+            if (avail.value === 'partial') {
+                rejectReason.textContent = "Terima kasih atas niat baik Anda. Demi kelancaran pendampingan peserta, seluruh relawan wajib mengikuti Pembekalan dan hadir penuh pada Hari-H.";
+                currentStep = -1; updateProgress(); showStep(-1); return;
+            }
+            nextStep(2);
+        }
+
+        function validateStep2() {
+            if (!document.querySelector('input[name="pressure_reaction"]:checked') || !document.querySelector('input[name="motivation"]:checked')) {
+                showNotification("Mohon pilih salah satu opsi pada kedua pertanyaan di atas.");
+                return;
+            }
+            nextStep(3);
+        }
+
+        function validateStep3() {
+            const selected = document.querySelector('input[name="role_choice"]:checked');
+            const secondary = document.getElementById('secondary-role').value;
+            if (!selected) { showNotification("Pilih satu divisi utama terlebih dahulu."); return; }
+            if (secondary && selected.value === secondary) {
+                showNotification("Divisi cadangan harus berbeda dari divisi utama Anda."); return;
+            }
+
+            const data = roleData[selected.value];
+            document.querySelectorAll('.role-title-display').forEach(el => el.textContent = data.title);
+
+            let sjtHtml = '';
+            data.sjts.forEach((item, index) => {
+                sjtHtml += `
+                    <div class="mb-6 fade-in">
+                        <div class="bg-healyou-50 p-4 rounded-xl border-l-4 border-healyou-500 mb-3">
+                            <p class="text-xs uppercase tracking-wider text-healyou-600 font-semibold mb-1">Situasi ${index + 1}</p>
+                            <p class="text-gray-800 font-medium text-sm leading-relaxed">${escapeHtml(item.scenario)}</p>
+                        </div>
+                        <div class="space-y-2.5">
+                `;
+                let opts = [...item.options].sort(() => Math.random() - 0.5);
+                opts.forEach((opt, optIdx) => {
+                    const inputId = `sjt_${index}_${optIdx}`;
+                    sjtHtml += `
+                        <div class="relative">
+                            <input type="radio" id="${inputId}" name="sjt_answer_${index}" value="${escapeHtml(opt.code)}" class="peer sr-only">
+                            <label for="${inputId}" class="flex p-3.5 border rounded-xl cursor-pointer hover:bg-healyou-50">
+                                <span class="text-gray-700 text-sm leading-relaxed">${escapeHtml(opt.text)}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                sjtHtml += `</div></div>`;
+            });
+
+            document.getElementById('sjt-container').innerHTML = sjtHtml;
+            document.getElementById('bei-prompt').textContent = data.beiPrompt;
+            document.getElementById('skill-prompt-label').textContent = data.skillPrompt;
+            nextStep(4);
+        }
+
+        function validateStep4() {
+            if (!document.querySelector('input[name="sjt_answer_0"]:checked') ||
+                !document.querySelector('input[name="sjt_answer_1"]:checked') ||
+                !document.querySelector('input[name="sjt_answer_2"]:checked')) {
+                showNotification("Mohon lengkapi pilihan tindakan untuk ketiga situasi di atas.");
+                return;
+            }
+            nextStep(5);
+        }
+
+        function validateStep5() {
+            const s = document.getElementById('star-s').value.trim();
+            const t = document.getElementById('star-t').value.trim();
+            const a = document.getElementById('star-a').value.trim();
+            const r = document.getElementById('star-r').value.trim();
+            const skill = document.getElementById('skill-input').value.trim();
+            const role = document.querySelector('input[name="role_choice"]:checked').value;
+
+            if (s.length < 40 || t.length < 40 || a.length < 40 || r.length < 40) {
+                showNotification("Setiap bagian pengalaman STAR wajib diisi minimal 40 karakter.");
+                return;
+            }
+            if (skill.length < 3) {
+                showNotification("Mohon lengkapi bukti pengalaman atau portofolio Anda.");
+                return;
+            }
+            if ((role === 'mc' || role === 'dokumentasi') && !/^https?:\/\//i.test(skill)) {
+                showNotification("Untuk divisi MC dan Dokumentasi, sertakan tautan portofolio yang diawali https:// atau http://");
+                return;
+            }
+            nextStep(6);
+        }
+
+        function generateResultCode12() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            const arr = new Uint8Array(12);
+            window.crypto.getRandomValues(arr);
+            return Array.from(arr, byte => chars[byte % chars.length]).join('');
+        }
+
+        window.submitForm = function() {
+            showNotification("Koneksi ke server Firebase belum tersedia.");
+        };
+    </script>
+
+    <script type="module">
+        import { firebaseConfig, KONTAK } from "./firebase-config.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        document.querySelectorAll('.kontak-display').forEach(el => el.textContent = KONTAK);
+
+        const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("API_KEY_ANDA");
+        let db = null;
+        if (isConfigured) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        }
+
+        window.submitForm = async function() {
+            const commitment = document.getElementById('final-commitment').value.trim();
+            if (commitment.length < 15) {
+                showNotification("Tuliskan minimal satu kalimat komitmen sebelum mengirim.");
+                return;
+            }
+            if (!db) {
+                showNotification("Konfigurasi Firebase belum dipasang di firebase-config.js.");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Mengirim...';
+
+            const kodeHasil = generateResultCode12();
+            const payload = {
+                kode_hasil: kodeHasil,
+                nama: document.getElementById('fullname').value.trim(),
+                whatsapp: document.getElementById('whatsapp').value.trim(),
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                ketersediaan: document.querySelector('input[name="availability"]:checked').value,
+                setuju_nda_privasi: document.getElementById('nda-consent').checked,
+                persetujuan_pdp: document.getElementById('pdp-consent').checked,
+                reaksi_tekanan: document.querySelector('input[name="pressure_reaction"]:checked').value,
+                motivasi: document.querySelector('input[name="motivation"]:checked').value,
+                peran_pilihan: document.querySelector('input[name="role_choice"]:checked').value,
+                peran_cadangan: document.getElementById('secondary-role').value || null,
+                jawaban_sjt: {
+                    s0: document.querySelector('input[name="sjt_answer_0"]:checked').value,
+                    s1: document.querySelector('input[name="sjt_answer_1"]:checked').value,
+                    s2: document.querySelector('input[name="sjt_answer_2"]:checked').value
+                },
+                star: {
+                    situasi: document.getElementById('star-s').value.trim(),
+                    tugas: document.getElementById('star-t').value.trim(),
+                    aksi: document.getElementById('star-a').value.trim(),
+                    hasil: document.getElementById('star-r').value.trim()
+                },
+                keahlian_khusus: document.getElementById('skill-input').value.trim(),
+                komitmen_cepat: commitment,
+                created_at: serverTimestamp()
+            };
+
+            try {
+                await addDoc(collection(db, "pendaftar_relawan"), payload);
+                try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+
+                document.getElementById('live-result-code').textContent = kodeHasil;
+                document.getElementById('final-code-display').textContent = kodeHasil;
+                document.getElementById('goto-hasil-link').href = `hasil.html?kode=${encodeURIComponent(kodeHasil)}`;
+                nextStep(7);
+
+                const unsub = onSnapshot(doc(db, "hasil_seleksi", kodeHasil), (snap) => {
+                    if (snap.exists()) {
+                        const d = snap.data();
+                        unsub();
+                        renderFinalResult(d);
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                showNotification("Gagal mengirim pendaftaran. Periksa koneksi internet Anda.");
+                btn.disabled = false;
+                btn.textContent = 'Kirim Pendaftaran';
+            }
+        };
+
+        function renderFinalResult(d) {
+            document.getElementById('waiting-evaluation-box').classList.add('hidden');
+            const box = document.getElementById('final-result-box');
+            box.classList.remove('hidden');
+
+            const badge = document.getElementById('res-status-badge');
+            badge.textContent = d.status_label || d.status_kode;
+            badge.className = d.status_kode === 'LOLOS_PRIORITAS'
+                ? 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-emerald-100 text-emerald-800'
+                : (d.status_kode === 'CADANGAN' ? 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-amber-100 text-amber-800' : 'inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-2 bg-healyou-100 text-healyou-800');
+
+            document.getElementById('final-score-display').textContent = `${d.total_skor} / 100`;
+            document.getElementById('final-breakdown-display').textContent = `SJT: ${d.skor_sjt}/40 • Esai STAR: ${d.skor_esai}/60`;
+            document.getElementById('final-reason-display').textContent = d.alasan_singkat || '';
+        }
+    </script>
+</body>
+</html>
